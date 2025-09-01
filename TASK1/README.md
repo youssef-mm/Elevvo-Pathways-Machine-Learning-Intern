@@ -58,7 +58,7 @@ It includes full preprocessing, class balancing, model training, and evaluation 
 
 1. Clone the repository:  
    ```bash
-   git clone https://github.com/your-username/loan-approval-project.git
+   git clone https://github.com/youssef-mm/Elevvo-Pathways-Machine-learning/loan-approval-project.git
    cd loan-approval-project
 
 pip install -r requirements.txt
