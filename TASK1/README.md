@@ -1,43 +1,76 @@
-Predicting Loan Sanction 
+# 📊 Loan Approval Prediction  
 
-This project aims to create machine learning models to predict loan approval by using the demographic and financial data of an applicant. 
+This project applies **Machine Learning** techniques to predict whether a loan application will be **approved or rejected** based on applicant information.  
+It includes full preprocessing, class balancing, model training, and evaluation steps.  
 
-Steps include: 
+---
 
-- Filling missing data
-- Encoding categorical variables
-- Feature scaling 
-- Using SMOTE to fix class imbalance
-- Training and testing of Logistic Regression and Decision Tree Classifier models
+## 📂 Project Structure  
 
-📂 Dataset
 
-The dataset in use is loan_approval_dataset.csv, which contains both numerical and categorical variables. Important columns include:
+---
 
-- education
-- self_employed
-- loan_status (target variable)
-- loan_id (removed from features)
+## ⚙️ Workflow  
 
-⚙️ Project Workflow 
+1. **Data Preprocessing**  
+   - Fill missing values (median for numerical, mode for categorical).  
+   - Encode categorical features using `LabelEncoder`.  
+   - Standardize features with `StandardScaler`.  
 
-Data Preprocessing
+2. **Train/Test Split**  
+   - 80% training, 20% testing.  
+   - Stratified sampling to preserve target distribution.  
 
-- Imputed missing values of numerical features with their median.
-- Imputed missing values of categorical features with the mode.
-- Encoded categorical features with LabelEncoder.
-- Standardized numerical features with StandardScaler.
+3. **Imbalance Handling**  
+   - Applied **SMOTE** to oversample minority class.  
 
-Train-Test Split
+4. **Models Trained**  
+   - **Logistic Regression**  
+   - **Decision Tree Classifier**  
 
-- 80% of data was used for training and the rest 20% for testing.
-- Used stratified sampling to maintain the proportion of classes. 
+5. **Evaluation**  
+   - `classification_report` (Precision, Recall, F1-score).  
+   - Confusion Matrix visualization.  
+   - Metrics comparison in bar charts.  
 
-Imbalance Handling
+---
 
-- The dataset was balanced using SMOTE (Synthetic Minority Oversampling Technique).
+## 📊 Results  
 
-Model Training 
+- Both models achieved solid results, with strengths in different metrics.  
+- Logistic Regression is simpler and interpretable.  
+- Decision Tree provides flexibility and handles imbalanced data better with depth control.  
 
-- Logistic Regression with increased max_iter=1333.
-- Decision Tree Classifier w
+📌 Metrics compared: **Precision, Recall, F1-score**.  
+
+---
+
+## 🛠️ Tools & Libraries  
+
+- **pandas, numpy** → Data handling and analysis  
+- **matplotlib, seaborn** → Visualization  
+- **scikit-learn** → Preprocessing, models, and evaluation metrics  
+- **imbalanced-learn (SMOTE)** → Handling class imbalance  
+
+---
+
+## ▶️ How to Run  
+
+1. Clone the repository:  
+   ```bash
+   git clone https://github.com/your-username/loan-approval-project.git
+   cd loan-approval-project
+
+pip install -r requirements.txt
+
+python src/loan_approval.py
+
+🚀 Future Work
+
+Add more advanced models (Random Forest, XGBoost).
+
+Hyperparameter tuning with GridSearchCV/RandomizedSearchCV.
+
+Deploy model as an API (Flask/FastAPI).
+
+Build interactive dashboard (Streamlit / Power BI)
