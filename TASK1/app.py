@@ -1,4 +1,3 @@
-# streamlit_app.py
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -44,6 +43,9 @@ for col in [' education', ' self_employed', ' loan_status']:
 # Features & target
 X = df.drop(columns=[' loan_status', 'loan_id'])
 y = df[' loan_status']
+
+# Save feature names
+feature_names = X.columns
 
 # Scale numeric
 scaler = StandardScaler()
@@ -92,3 +94,23 @@ st.write(f"**F1-score:** {f1:.2f}")
 
 # Save Confusion Matrix as PNG
 fig.savefig("confusion_matrix.png", dpi=300, bbox_inches="tight")
+
+# ------------------ Prediction Section ------------------
+st.subheader("🔮 Make a Prediction")
+
+input_data = {}
+for col in feature_names:
+    val = st.number_input(f"Enter {col}", value=0.0)
+    input_data[col] = val
+
+if st.button("Predict"):
+    new_df = pd.DataFrame([input_data])
+
+    # Reorder columns to match training
+    new_df = new_df[feature_names]
+
+    # Scale with the same scaler
+    new_scaled = scaler.transform(new_df)
+
+    prediction = model.predict(new_scaled)[0]
+    st.success(f"✅ Prediction: {'Approved' if prediction == 1 else 'Rejected'}")
