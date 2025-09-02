@@ -21,7 +21,7 @@ The app allows you to upload your dataset, preprocess data (handling missing val
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/loan-approval-app.git
+   git clone https://github.com/youssef-mm/loan-approval-app.git
    cd loan-approval-app
 Create a virtual environment (recommended):
 
