@@ -1,9 +1,9 @@
-Elevvo Pathways – Machine Learning Internship  
+## Elevvo Pathways – Machine Learning Internship  
 
 This repository documents my progress and solutions for the **Machine Learning Internship Pathways** program with **Elevvo**.  
 Each task is focused on building practical skills in data science and machine learning using Python.  
 
-📂 Repository Structure
+## 📂 Repository Structure
 
 Elevvo-Pathways-Machine-Learning-Intern/
 │
@@ -18,7 +18,7 @@ Elevvo-Pathways-Machine-Learning-Intern/
 │
 └── README.md
 
-📊Task 2: Customer Segmentation  
+## 📊Task 2: Customer Segmentation  
 
 -Objective
 Cluster mall customers into meaningful segments based on their **Annual Income** and **Spending Score**.  
