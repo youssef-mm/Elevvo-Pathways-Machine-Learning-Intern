@@ -1,4 +1,4 @@
-# Movie Recommender System 
+# Movie Recommender System with Selectable Metrics
 
 import pandas as pd
 import numpy as np
@@ -6,18 +6,19 @@ import requests
 import streamlit as st
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import TruncatedSVD
+from sklearn.metrics import mean_squared_error
+import math
 
-# TMDb API
+
+# TMDb API for Posters
 
 API_KEY = "81f5580c4bb6c74b539d051282b52ba5"
 BASE_URL = "https://api.themoviedb.org/3"
 IMG_BASE = "https://image.tmdb.org/t/p/w500"
 
 def get_movie_poster(title):
-    url = f"{BASE_URL}/search/movie"
-    params = {"api_key": API_KEY, "query": title}
     try:
-        response = requests.get(url, params=params).json()
+        response = requests.get(f"{BASE_URL}/search/movie", params={"api_key": API_KEY, "query": title}).json()
         if response.get("results"):
             poster_path = response["results"][0].get("poster_path")
             if poster_path:
@@ -26,15 +27,16 @@ def get_movie_poster(title):
         pass
     return None
 
-# Load Data (cached)
+
+# Load Data
 
 @st.cache_data
 def load_data():
     columns = ["user_id", "item_id", "rating", "timestamp"]
     data = pd.read_csv("u.data", sep="\t", names=columns)
     item_cols = ["item_id", "title", "release_date", "video_release_date", "IMDb_URL",
-                 "unknown", "Action", "Adventure", "Animation", "Children's", "Comedy", 
-                 "Crime", "Documentary", "Drama", "Fantasy", "Film-Noir", "Horror", 
+                 "unknown", "Action", "Adventure", "Animation", "Children's", "Comedy",
+                 "Crime", "Documentary", "Drama", "Fantasy", "Film-Noir", "Horror",
                  "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"]
     items = pd.read_csv("u.item", sep="|", names=item_cols, encoding="latin-1")
     return data, items
@@ -42,24 +44,18 @@ def load_data():
 ratings, movies = load_data()
 
 
-# Precompute Matrices (cached)
+# Precompute Matrices
 
 @st.cache_resource
 def precompute_models():
     matrix = ratings.pivot(index="user_id", columns="item_id", values="rating").fillna(0)
-    # User similarity
-    user_sim = cosine_similarity(matrix)
-    user_sim = pd.DataFrame(user_sim, index=matrix.index, columns=matrix.index)
-    # Item similarity
-    item_sim = cosine_similarity(matrix.T)
-    item_sim = pd.DataFrame(item_sim, index=matrix.columns, columns=matrix.columns)
-    # SVD
+    user_sim = pd.DataFrame(cosine_similarity(matrix), index=matrix.index, columns=matrix.index)
+    item_sim = pd.DataFrame(cosine_similarity(matrix.T), index=matrix.columns, columns=matrix.columns)
     svd = TruncatedSVD(n_components=40, random_state=42)
     U = svd.fit_transform(matrix)
     VT = svd.components_
-    preds = np.dot(U, VT)
-    preds_df = pd.DataFrame(np.clip(preds, 0, 5), index=matrix.index, columns=matrix.columns)
-    return matrix, user_sim, item_sim, preds_df
+    svd_preds = pd.DataFrame(np.clip(np.dot(U, VT), 0, 5), index=matrix.index, columns=matrix.columns)
+    return matrix, user_sim, item_sim, svd_preds
 
 user_item_matrix, user_sim, item_sim, svd_preds = precompute_models()
 
@@ -86,36 +82,58 @@ def recommend_itemcf(user_id, n_recs=5):
     return [m for m, _ in ranked[:n_recs]]
 
 def recommend_svd(user_id, n_recs=5):
-    rated = user_item_matrix.loc[user_id]
-    unrated = rated[rated == 0].index
+    unrated = user_item_matrix.loc[user_id][user_item_matrix.loc[user_id]==0].index
     preds = svd_preds.loc[user_id, unrated].sort_values(ascending=False)[:n_recs]
     return preds.index
 
 
-# Evaluation Function (Precision@K)
+# Evaluation Functions
 
 def evaluate_precision(user_id, recs, k=5):
-    relevant = ratings[(ratings['user_id'] == user_id) & (ratings['rating'] >= 4)]['item_id'].values
-    if len(relevant) == 0:
-        return None
+    relevant = ratings[(ratings['user_id']==user_id) & (ratings['rating']>=4)]['item_id'].values
+    if len(relevant) == 0: return None
     hits = len(set(recs).intersection(set(relevant)))
     return hits / k
+
+def evaluate_recall(user_id, recs, k=5):
+    relevant = ratings[(ratings['user_id']==user_id) & (ratings['rating']>=4)]['item_id'].values
+    if len(relevant) == 0: return None
+    hits = len(set(recs).intersection(set(relevant)))
+    return hits / len(relevant)
+
+def evaluate_f1(user_id, recs, k=5):
+    precision = evaluate_precision(user_id, recs, k) or 0
+    recall = evaluate_recall(user_id, recs, k) or 0
+    if precision + recall == 0: return 0
+    return 2 * (precision * recall) / (precision + recall)
+
+def evaluate_map(user_id, recs, k=5):
+    relevant = ratings[(ratings['user_id']==user_id) & (ratings['rating']>=4)]['item_id'].values
+    if len(relevant) == 0: return None
+    hits, sum_precisions = 0, 0
+    for i, rec in enumerate(recs, start=1):
+        if rec in relevant:
+            hits += 1
+            sum_precisions += hits / i
+    return sum_precisions / min(len(relevant), k)
 
 
 # Streamlit UI
 
 st.set_page_config(page_title="Movie Recommender", layout="wide")
-st.title("🎬 Movie Recommender System ")
+st.title("🎬 Movie Recommender System")
 
 # Sidebar
 with st.sidebar:
     st.header("Settings")
-    user_id = st.number_input("Enter User ID (1–943):", min_value=1, max_value=943, value=1)
-    top_n = st.slider("Number of Recommendations:", min_value=3, max_value=15, value=5)
+    user_id = st.number_input("Enter User ID:", min_value=int(ratings['user_id'].min()),
+                              max_value=int(ratings['user_id'].max()), value=1)
+    top_n = st.slider("Number of Recommendations:", 3, 15, 5)
     method = st.selectbox("Choose Method:", ["User-based CF", "Item-based CF", "SVD"])
-    evaluate = st.checkbox("Evaluate Model (Precision@K)")
+    st.subheader("Select Evaluation Metrics")
+    metrics = st.multiselect("Metrics:", ["Precision", "Recall", "F1", "MAP", "RMSE"], default=["Precision"])
 
-# Button 
+# Recommend Button
 if st.button("Recommend Movies"):
     if method == "User-based CF":
         recs = recommend_usercf(user_id, n_recs=top_n)
@@ -126,17 +144,16 @@ if st.button("Recommend Movies"):
 
     st.subheader(f"Top {top_n} Recommendations for User {user_id}")
 
-    #  Grid
-    n_cols = 4  
-    rows = (len(recs) + n_cols - 1) // n_cols  # عدد الصفوف
+    # Display Grid
+    n_cols = 4
+    rows = (len(recs)+n_cols-1)//n_cols
     for r in range(rows):
         cols = st.columns(n_cols)
         for c in range(n_cols):
-            idx = r * n_cols + c
-            if idx >= len(recs):
-                break
+            idx = r*n_cols + c
+            if idx >= len(recs): break
             movie_id = recs[idx]
-            movie_title = movies[movies["item_id"] == movie_id]["title"].values[0]
+            movie_title = movies[movies["item_id"]==movie_id]["title"].values[0]
             poster = get_movie_poster(movie_title)
             with cols[c]:
                 if poster:
@@ -144,10 +161,17 @@ if st.button("Recommend Movies"):
                 else:
                     st.write(movie_title)
 
-    # Evaluation
-    if evaluate:
-        precision = evaluate_precision(user_id, recs, k=top_n)
-        if precision is not None:
-            st.write(f"✅ Precision@{top_n}: {precision:.2f}")
-        else:
-            st.write("⚠️ No relevant movies found for evaluation.")
+    # Display Selected Metrics
+    st.subheader("📊 Evaluation Metrics")
+    if "Precision" in metrics:
+        precision = evaluate_precision(user_id, recs, top_n)
+        st.write(f"✅ Precision@{top_n}: {precision:.2f}" if precision is not None else "⚠️ Not available")
+    if "Recall" in metrics:
+        recall = evaluate_recall(user_id, recs, top_n)
+        st.write(f"🔄 Recall@{top_n}: {recall:.2f}" if recall is not None else "⚠️ Not available")
+    if "F1" in metrics:
+        f1 = evaluate_f1(user_id, recs, top_n)
+        st.write(f"🎯 F1@{top_n}: {f1:.2f}")
+    if "MAP" in metrics:
+        map_score = evaluate_map(user_id, recs, top_n)
+        st.write(f"📌 MAP@{top_n}: {map_score:.2f}" if map_score is not None else "⚠️ Not available")
