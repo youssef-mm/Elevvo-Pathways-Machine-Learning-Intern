@@ -36,20 +36,19 @@ u.data: Ratings (user_id, item_id, rating, timestamp)
 u.item: Movie metadata (titles, genres, release dates, etc.)
 
 ## ⚡ Usage
-1. Clone repo & install dependencies
 git clone https://github.com/yourusername/movie-recommender.git
 cd movie-recommender
 pip install -r requirements.txt
 
-2. Run Jupyter Examples
 
-The file MRS.py contains the class for recommendation. Example usage:
+2. Run Jupyter Examples
 
 columns = ['user_id', 'item_id', 'rating', 'timestamp']
 data = pd.read_csv('u.data', sep='\t', names=columns)
 
 mrs = MRS(data, user_column='user_id', movie_column='item_id', rating_column='rating')
 print(mrs.recommend(1))   # Basic recommendations
+
 
 3. Run Streamlit App
 streamlit run app.py
@@ -86,3 +85,4 @@ Improve evaluation metrics (Recall, F1, RMSE)
 
 
 Deploy online (Streamlit Cloud / Hugging Face Spaces)
+
