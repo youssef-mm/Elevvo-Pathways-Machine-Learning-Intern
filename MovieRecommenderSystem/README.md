@@ -5,7 +5,7 @@ This project implements a Movie Recommender System using the MovieLens 100k data
 It applies Collaborative Filtering (User-based & Item-based) and Matrix Factorization (SVD) to recommend movies for users.
 The project also includes an interactive Streamlit web app with movie posters fetched from the TMDb API.
 
-🚀 Features
+## 🚀 Features
 
 User-based Collaborative Filtering (CF)
 
@@ -19,7 +19,7 @@ Movie posters & metadata via TMDb API
 
 Interactive UI with Streamlit
 
-🛠️ Tech Stack
+## 🛠️ Tech Stack
 
 Python (Pandas, NumPy, Scikit-learn)
 
@@ -27,7 +27,7 @@ Streamlit (Web App)
 
 TMDb API (Movie Posters)
 
-📂 Dataset
+## 📂 Dataset
 
 The project uses the MovieLens 100k dataset:
 
@@ -35,7 +35,7 @@ u.data: Ratings (user_id, item_id, rating, timestamp)
 
 u.item: Movie metadata (titles, genres, release dates, etc.)
 
-⚡ Usage
+## ⚡ Usage
 1. Clone repo & install dependencies
 git clone https://github.com/yourusername/movie-recommender.git
 cd movie-recommender
@@ -54,7 +54,7 @@ print(mrs.recommend(1))   # Basic recommendations
 3. Run Streamlit App
 streamlit run app.py
 
-📊 Example
+## 📊 Example
 
 User-based Precision@10 ≈ 0.26
 
@@ -62,7 +62,7 @@ Item-based Precision@10 ≈ 0.23
 
 SVD Precision@5 ≈ 0.53
 
-🌟 Demo UI
+## 🌟 Demo UI
 
 Choose User ID & method (User-based CF, Item-based CF, or SVD).
 
@@ -70,7 +70,7 @@ View recommended movies with titles + posters.
 
 Evaluate with Precision@K.
 
-🔑 API Key Setup
+## 🔑 API Key Setup
 
 To display posters, you need a TMDb API key
 .
@@ -78,10 +78,11 @@ Replace inside app.py:
 
 API_KEY = "YOUR_TMDB_API_KEY"
 
-📌 Future Work
+## 📌 Future Work
 
 Add hybrid recommendation (content + CF)
 
 Improve evaluation metrics (Recall, F1, RMSE)
+
 
 Deploy online (Streamlit Cloud / Hugging Face Spaces)
