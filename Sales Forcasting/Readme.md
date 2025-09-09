@@ -40,9 +40,13 @@ It includes **data preprocessing, feature engineering, clustering, and time seri
    ```bash
    git clone https://github.com/youssef-mm/Elevvo-Pathways-Machine-Learning-Intern.git
 
-cd Sales Forcasting
+2. Navigate to the project folder:
+   ```bash
+   cd Sales Forcasting
 
-streamlit run app.py
+3. Run the Jupyter Notebook:
+   ```bash
+   streamlit run app.py
 
 
 ## 📌 Results
@@ -50,5 +54,6 @@ streamlit run app.py
 Models compared using RMSE & R².
 
 XGBoost with hyperparameter tuning achieved the best performance.
+
 
 Seasonal decomposition highlighted strong yearly seasonality in sales.
